@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Java Quiz Result</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2ff;
+            text-align: center;
+            padding: 40px 15px;
+        }
+
+        .result-box {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+        }
+
+        .score { color: #2563eb; font-size: 28px; }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 22px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="result-box">
+    <h1>Quiz Completed!</h1>
+    <h2>Your Java Quiz Result</h2>
+
+    <p class="score">
+        <span th:text="${score}">0</span> /
+        <span th:text="${total}">50</span>
+    </p>
+
+    <h3>
+        Percentage:
+        <span th:text="${#numbers.formatDecimal(percentage, 1, 2)}">
+            0.00
+        </span>%
+    </h3>
+
+    <p>Thank you for participating!</p>
+
+    <a href="/quiz">Try Again</a>
+</div>
+</body>
+</html>

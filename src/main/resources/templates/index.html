@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Quiz</title>
+</head>
+<body>
+<h1>Online Quiz</h1><h2 th:text="${question}">Question</h2>
+
+<form>
+    <p><input type="radio" name="answer" value="Java"> <span th:text="${option1}">Java</span></p>
+    <p><input type="radio" name="answer" value="Python"> <span th:text="${option2}">Python</span></p>
+    <p><input type="radio" name="answer" value="C++"> <span th:text="${option3}">C++</span></p>
+
+    <button type="button" onclick="alert('Next step mein answer checking banayenge!')">
+        Submit Answer
+    </button>
+</form>
+
+</body>
+</html>

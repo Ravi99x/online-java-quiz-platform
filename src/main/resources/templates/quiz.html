@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Java MCQ Quiz</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2ff;
+            margin: 0;
+            padding: 25px 12px;
+            color: #1f2937;
+        }
+
+        .quiz-box {
+            max-width: 760px;
+            margin: 25px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 22px #00000015;
+        }
+
+        h1 {
+            color: #1e3a8a;
+        }
+
+        #startScreen {
+            display: block;
+            text-align: center;
+            padding: 25px 5px;
+        }
+
+        #quizForm {
+            display: none;
+        }
+
+        .question {
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .progress {
+            font-weight: bold;
+            color: #4b5563;
+        }
+
+        .timer {
+            color: #dc2626;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .option {
+            display: block;
+            padding: 13px;
+            margin: 10px 0;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #dbeafe;
+        }
+
+        .option input {
+            margin-right: 8px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            margin: 8px 5px 0 0;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #prevBtn {
+            background: #4b5563;
+        }
+
+        #prevBtn:hover {
+            background: #374151;
+        }
+
+        #submitBtn {
+            background: #15803d;
+        }
+
+        #submitBtn:hover {
+            background: #166534;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="quiz-box">
+
+    <h1>Java MCQ Quiz</h1>
+
+    <!-- START SCREEN -->
+    <div id="startScreen">
+        <h2>Welcome to Java Quiz!</h2>
+        <p>Total Questions: 50</p>
+        <p>Time per Question: 30 Seconds</p>
+        <p>Total Duration: 25 Minutes</p>
+
+        <button type="button" onclick="startQuiz()">
+            Start Quiz
+        </button>
+    </div>
+
+    <!-- QUIZ FORM: HIDDEN UNTIL START -->
+    <form id="quizForm" action="/result" method="post">
+
+        <p class="progress">
+            Question <span id="current">1</span> of
+            <span th:text="${#lists.size(questions)}">50</span>
+        </p>
+
+        <p class="timer">
+            Time left: <span id="timer">30</span> sec
+        </p>
+
+        <!-- QUESTIONS FROM QuizController.java -->
+        <div th:each="q, stat : ${questions}"
+             class="question"
+             th:classappend="${stat.index == 0} ? ' active' : ''">
+
+            <h3 th:text="${stat.index + 1 + '. ' + q.question}">
+                Question
+            </h3>
+
+            <label class="option"
+                   th:each="option, optStat : ${q.options}">
+
+                <input type="radio"
+                       th:name="${'q' + stat.index}"
+                       th:value="${optStat.index}">
+
+                <span th:text="${option}">Option</span>
+            </label>
+
+        </div>
+
+        <!-- NAVIGATION BUTTONS -->
+        <div class="navigation">
+
+            <button type="button"
+                    id="prevBtn"
+                    onclick="previousQuestion()"
+                    style="display:none">
+                Previous Question
+            </button>
+
+            <button type="button"
+                    id="nextBtn"
+                    onclick="nextQuestion()">
+                Next Question
+            </button>
+
+            <button type="submit"
+                    id="submitBtn"
+                    style="display:none">
+                Submit Quiz
+            </button>
+
+        </div>
+    </form>
+
+</div>
+
+<script>
+    let current = 0;
+    let timeLeft = 30;
+    let interval = null;
+    let started = false;
+    let submitted = false;
+
+    const form = document.getElementById("quizForm");
+    const startScreen = document.getElementById("startScreen");
+    const cards = document.querySelectorAll(".question");
+
+    // Quiz will NOT start automatically.
+    // Only the Start Quiz button starts the timer.
+    function startQuiz() {
+        if (started) return;
+
+        started = true;
+        startScreen.style.display = "none";
+        form.style.display = "block";
+
+        current = 0;
+        showQuestion();
+    }
+
+    // Display the current question and buttons.
+    function showQuestion() {
+        cards.forEach(function(card, index) {
+            card.classList.toggle("active", index === current);
+        });
+
+        document.getElementById("current").textContent = current + 1;
+
+        document.getElementById("prevBtn").style.display =
+            current === 0 ? "none" : "inline-block";
+
+        document.getElementById("nextBtn").style.display =
+            current === cards.length - 1 ? "none" : "inline-block";
+
+        document.getElementById("submitBtn").style.display =
+            current === cards.length - 1 ? "inline-block" : "none";
+
+        startTimer();
+    }
+
+    // Start a fresh 30-second timer for the displayed question.
+    function startTimer() {
+        clearInterval(interval);
+
+        timeLeft = 30;
+        document.getElementById("timer").textContent = timeLeft;
+
+        interval = setInterval(function() {
+            timeLeft--;
+
+            document.getElementById("timer").textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                moveNext();
+            }
+        }, 1000);
+    }
+
+    // Next Question button.
+    function nextQuestion() {
+        if (!started || submitted) return;
+        moveNext();
+    }
+
+    // Previous Question button.
+    function previousQuestion() {
+        if (!started || submitted) return;
+
+        if (current > 0) {
+            clearInterval(interval);
+            current--;
+            showQuestion();
+        }
+    }
+
+    // Move forward, or submit after the last question.
+    function moveNext() {
+        if (!started || submitted) return;
+
+        clearInterval(interval);
+
+        if (current < cards.length - 1) {
+            current++;
+            showQuestion();
+        } else {
+            submitted = true;
+            form.requestSubmit();
+        }
+    }
+
+    // Stop the timer when the form is submitted.
+    form.addEventListener("submit", function(event) {
+        clearInterval(interval);
+        submitted = true;
+    });
+
+</script>
+
+</body>
+</html>
